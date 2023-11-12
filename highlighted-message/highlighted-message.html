@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style type="text/css">
+			:root {
+			  --font-base:"Inter","Roobert","Helvetica Neue",Helvetica,Arial,sans-serif;
+			  --font-display:"Roobert","Inter","Helvetica Neue",Helvetica,Arial,sans-serif;
+			  --font-color: rgb(222, 222, 227);
+			  --msg-margin: 1em;
+			}
+			html, body {
+				height: 100vh;
+				overflow: hidden;
+				margin: 0;
+				padding: 0;
+				background-color: rgba(0,0,0,0);
+				font-family: var(--font-base);
+				color: var(--font-color);
+				font-size: 1.4rem;
+			}
+			#highlighted {
+				margin: var(--msg-margin);
+				padding: var(--msg-margin);
+				background: #18120e;
+				border-radius: var(--msg-margin);
+				position: absolute;
+				transition: 0.5s ease-in-out;
+				transform: translate(calc(100% + (2 * var(--msg-margin))), 0);
+			}
+			#highlighted.visible {
+				transform: translate(0, 0);
+			}
+			.displayName {
+				font-weight: 700;
+			}
+			.badges img, .message img {
+				height: 1em;
+			}
+			svg {
+				fill: var(--font-color);
+			}
+			.right {
+				right: 0;
+			}
+			.left {
+				left: 0;
+			}
+			.center {
+				left: 0;
+				right: 0;
+			}
+			.bottom {
+				bottom: 0;
+			}
+			
+			@keyframes slidein {
+				from: { left: 100%; }
+				to: { left: 0; }
+			}
+		</style>
+	</head>
+	<body>
+		<div id="highlighted" class="bottom center">
+			<span class="userType twitch">
+				<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M391.17,103.47H352.54v109.7h38.63ZM285,103H246.37V212.75H285ZM120.83,0,24.31,91.42V420.58H140.14V512l96.53-91.42h77.25L487.69,256V0ZM449.07,237.75l-77.22,73.12H294.61l-67.6,64v-64H140.14V36.58H449.07Z"/></svg>
+			</span>
+			<span class="badges"></span>
+			<span class="displayName"></span>: <span class="message"></span>
+		</div>
+		<script type="text/javascript" src="highlighted-message.js"></script>
+		<script type="text/javascript">
+		function ready(fn) {
+		  if (document.readyState !== 'loading') {
+			fn();
+		  } else {
+			document.addEventListener('DOMContentLoaded', fn);
+		  }
+		}
+		
+		function generateElements(html) {
+			console.log(html)
+		  const template = document.createElement('template');
+		  template.innerHTML = html.trim();
+		  return template.content.children;
+		}
+		
+		function buildRichMessage(message, emotes) {
+			var index = 0;
+			var result = "";
+			
+			emotes.forEach(e => {
+				// Add anything from the previous ending index to this index
+				result += message.substring(index, e.startIndex);
+				// Generate the image tag for the emote
+				result += `<img src="${e.imageUrl}" alt="${e.name}">`;
+				// Update the last index to the ending index of this emote
+				index = e.endIndex + 1;
+			});
+			// Add on any missing text
+			result += message.substring(index)
+			
+			return result;
+		}
+			
+			ready(() => {
+				// document.querySelector("#highlighted .userType").innerText = message.userType;
+				document.querySelector("#highlighted .displayName").innerText = message.displayName;
+				document.querySelector("#highlighted .displayName").style.color = message.color;
+				document.querySelector("#highlighted .message").innerHTML = buildRichMessage(message.message, message.emotes);
+				let badges = message.badges.map(badge => `<img src="${badge.imageUrl}" alt="${badge.name}">`)
+				
+				document.querySelector("#highlighted .badges").innerHTML = badges.join(" ")
+				document.getElementById('highlighted').classList.add('visible');
+				setTimeout(() => {
+					document.getElementById('highlighted').classList.add('visible');
+				}, 1000);
+				
+				setTimeout(() => {
+					document.getElementById('highlighted').classList.remove('visible');
+				}, 6500);
+			})
+		</script>
+	</body>
+</html>
